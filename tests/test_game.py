@@ -1,6 +1,10 @@
 from prototype.game import Game
 
-#initial game tests
+
+# -------------------------
+# Initial game-state tests
+# -------------------------
+
 def test_game_starts_with_two_disconnected_actors():
     """A new game should contain only the two endpoint actors."""
     game = Game(1, 2)
@@ -18,14 +22,16 @@ def test_game_starts_with_two_disconnected_actors():
         ("actor", 2): set(),
     }
 
-    assert game.is_connected() is False
+    assert game.find_player_path() is None
 
 
-def test_same_start_and_target_actor_is_connected():
+def test_same_start_and_target_returns_single_node_path():
     """An actor is already connected to themselves."""
     game = Game(1, 1)
 
-    assert game.is_connected() is True
+    assert game.find_player_path() == [
+        ("actor", 1),
+    ]
 
 
 # -------------------------
@@ -41,7 +47,6 @@ def test_valid_movie_is_added_and_connected():
     assert result is True
     assert game.movie_ids == {10}
     assert game.lives == 3
-
     assert game.graph[("actor", 1)] == {("movie", 10)}
     assert game.graph[("movie", 10)] == {("actor", 1)}
 
@@ -53,12 +58,10 @@ def test_movie_connects_to_all_matching_existing_actors():
     result = game.add_movie(10, {1, 2, 3})
 
     assert result is True
-
     assert game.graph[("movie", 10)] == {
         ("actor", 1),
         ("actor", 2),
     }
-
     assert ("movie", 10) in game.graph[("actor", 1)]
     assert ("movie", 10) in game.graph[("actor", 2)]
 
@@ -126,7 +129,6 @@ def test_valid_actor_is_added_and_connected():
     assert result is True
     assert game.actor_ids == {1, 2, 3}
     assert game.lives == 3
-
     assert game.graph[("actor", 3)] == {("movie", 10)}
     assert ("actor", 3) in game.graph[("movie", 10)]
 
@@ -141,12 +143,10 @@ def test_actor_connects_to_all_matching_existing_movies():
     result = game.add_actor(5, {10, 20, 30})
 
     assert result is True
-
     assert game.graph[("actor", 5)] == {
         ("movie", 10),
         ("movie", 20),
     }
-
     assert ("actor", 5) in game.graph[("movie", 10)]
     assert ("actor", 5) in game.graph[("movie", 20)]
 
@@ -205,33 +205,39 @@ def test_duplicate_actor_does_not_lose_a_life():
 
 
 # -------------------------
-# Connectivity and victory tests
+# Path and victory tests
 # -------------------------
 
-def test_disconnected_graph_returns_false():
-    """The target should remain unreachable when only one side is expanded."""
+def test_find_player_path_returns_none_when_disconnected():
+    """No route should be returned while the endpoints are disconnected."""
     game = Game(1, 2)
 
     game.add_movie(10, {1, 3})
     game.add_actor(3, {10})
 
-    assert game.is_connected() is False
+    assert game.find_player_path() is None
     assert game.status == "playing"
 
 
-def test_connected_graph_returns_true():
-    """BFS should find a path between the endpoint actors."""
+def test_find_player_path_returns_full_bipartite_route():
+    """The route should contain actor and movie nodes in order."""
     game = Game(1, 2)
 
     game.add_movie(10, {1, 3})
     game.add_movie(20, {2, 4})
     game.add_actor(5, {10, 20})
 
-    assert game.is_connected() is True
+    assert game.find_player_path() == [
+        ("actor", 1),
+        ("movie", 10),
+        ("actor", 5),
+        ("movie", 20),
+        ("actor", 2),
+    ]
 
 
 def test_status_changes_to_won_when_actor_connects_graph():
-    """Adding an actor that joins both graph components should win the game."""
+    """Adding an actor that joins both graph components should win."""
     game = Game(1, 2)
 
     game.add_movie(10, {1, 3})
@@ -244,13 +250,17 @@ def test_status_changes_to_won_when_actor_connects_graph():
 
 
 def test_status_changes_to_won_when_movie_connects_graph():
-    """Adding a movie shared by both endpoint actors should win the game."""
+    """Adding a movie shared by both endpoint actors should win."""
     game = Game(1, 2)
 
     result = game.add_movie(10, {1, 2})
 
     assert result is True
-    assert game.is_connected() is True
+    assert game.find_player_path() == [
+        ("actor", 1),
+        ("movie", 10),
+        ("actor", 2),
+    ]
     assert game.status == "won"
 
 
@@ -271,7 +281,7 @@ def test_every_edge_is_bidirectional():
 
 
 def test_graph_contains_only_actor_movie_edges():
-    """The bipartite graph must never contain actor-actor or movie-movie edges."""
+    """The graph must never contain actor-actor or movie-movie edges."""
     game = Game(1, 2)
 
     game.add_movie(10, {1, 3})
@@ -283,5 +293,4 @@ def test_graph_contains_only_actor_movie_edges():
 
         for neighbour in neighbours:
             neighbour_type, _ = neighbour
-
             assert node_type != neighbour_type

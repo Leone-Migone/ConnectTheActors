@@ -66,30 +66,50 @@ class Game:
             self.status = "won"
         return True
 
-    def is_connected(self) -> bool:
+    def find_player_path(self):
         start_node = ("actor", self.start_actor_id)
         target_node = ("actor", self.target_actor_id)
 
         if start_node == target_node:
-            return True
+            return [start_node]
 
         queue = deque([start_node])
         visited = {start_node}
+        parents = {}
 
         while queue:
             current_node = queue.popleft()
 
             for neighbour in self.graph[current_node]:
                 if neighbour not in visited:
-                    if neighbour == target_node:
-                        return True
-
+                    
                     visited.add(neighbour)
+                    parents[neighbour] = current_node
                     queue.append(neighbour)
+                    if neighbour == target_node:
+                        return self.reconstruct_path(parents,start_node, target_node)
 
-        return False
+
+        return None
         
+    def is_connected(self) -> bool:
+        return self.find_player_path() is not None
+    
+    #recosntructs path from target to start actor
+    def reconstruct_path( self,
+    parents,
+    start_node,
+    target_node,
+    ):
+        path = [target_node]
+        current_node = target_node
+        ##till we iterated back
+        while current_node != start_node:
+            current_node = parents[current_node]
+            path.append(current_node)
 
+        path.reverse()
+        return path
 
 if __name__ == "__main__":
     game = Game(1, 2)
