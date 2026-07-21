@@ -15,8 +15,10 @@ else:
     for index, actor in enumerate(results[:5],start=1):
         print(index,actor["name"],actor["id"])
     
+     
     choice = int(input("Select actor: "))
-    selected_actor = results[choice]
+    selected_actor = results[choice -1]
+    
     credits = get_actor_movie_credits(results[0]["id"])
     print(results)
     titles  = []
