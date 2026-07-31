@@ -41,6 +41,27 @@ def search_actors(name: str) -> list[dict]:
 
     return actors
 
+def search_movies(title: str) -> list[dict]:
+    response = requests.get(
+        f"{BASE_URL}/search/movie",
+        headers=HEADERS,
+        params={"query": title},
+        timeout=10,
+    )
+    response.raise_for_status()
+
+    data = response.json()
+
+    return [
+        {
+            "id": movie["id"],
+            "title": movie["title"],
+            "release_date": movie.get("release_date"),
+            "poster_path": movie.get("poster_path"),
+        }
+        for movie in data.get("results", [])
+    ]
+
 def get_actor_movie_credits(actor_id: int) -> list[dict]:
     response = requests.get(
         f"{BASE_URL}/person/{actor_id}/movie_credits",
@@ -52,3 +73,50 @@ def get_actor_movie_credits(actor_id: int) -> list[dict]:
     data = response.json()
     return data["cast"]
 
+
+def get_movie_cast_ids(movie_id: int) -> set[int]:
+    url = f"{BASE_URL}/movie/{movie_id}/credits"
+
+    response = requests.get(
+        url,
+        headers=HEADERS,
+        timeout=10,
+    )
+    response.raise_for_status()
+
+    data = response.json()
+
+    return {
+        cast_member["id"]
+        for cast_member in data.get("cast", [])
+        if "id" in cast_member
+    }
+
+def get_actor_movie_credit_ids(actor_id: int) -> set[int]:
+    credits = get_actor_movie_credits(actor_id)
+
+    return {
+        movie["id"]
+        for movie in credits
+        if "id" in movie
+    }
+
+
+if __name__ == "__main__":
+    actors = search_actors("Cillian Murphy")
+    print("Actors:", actors[:3])
+
+    movies = search_movies("Oppenheimer")
+    print("Movies:", movies[:3])
+
+    if actors:
+        actor_id = actors[0]["id"]
+        credit_ids = get_actor_movie_credit_ids(actor_id)
+        print("Actor credit count:", len(credit_ids))
+        print("Some movie IDs:", list(credit_ids)[:10])
+
+    if movies:
+        movie_id = movies[0]["id"]
+        cast_ids = get_movie_cast_ids(movie_id)
+        print("Movie cast count:", len(cast_ids))
+        print("Some actor IDs:", list(cast_ids)[:10])
