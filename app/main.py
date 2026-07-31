@@ -44,13 +44,7 @@ def create_game(game_data: GameCreate):
 
     games[game_id] = game
 
-    return GameResponse(
-        game_id=game_id,
-        start_actor_id=game.start_actor_id,
-        target_actor_id=game.target_actor_id,
-        lives=game.lives,
-        status=game.status,
-    )
+    return build_game_response(game_id=game_id, game=game)
 
 
 @app.get(
@@ -66,13 +60,7 @@ def get_game(game_id: str):
             detail="Game not found",
         )
 
-    return GameResponse(
-        game_id=game_id,
-        start_actor_id=game.start_actor_id,
-        target_actor_id=game.target_actor_id,
-        lives=game.lives,
-        status=game.status,
-    )
+    return build_game_response(game_id=game_id, game=game)
 
 
 @app.get("/actors/search")
