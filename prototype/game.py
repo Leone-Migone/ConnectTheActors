@@ -16,6 +16,9 @@ class Game:
         }
     #passing in movie id and set of actor ids that were in the movie, if any of those actors are already in the graph then add the movie to the graph and link them to the actors
     def add_movie(self, movie_id: int, cast_actors_ids: set[int]) -> bool:
+        if self.status != "playing":
+            return False
+        
         if movie_id in self.movie_ids:
             return False
         matching_actor_ids = self.actor_ids.intersection(cast_actors_ids)
@@ -43,6 +46,9 @@ class Game:
         
     #passing in actor id and set of movie ids that actor has been in, if any of those movies are already in the graph then add the actor to the graph and link them to the movies
     def add_actor(self, actor_id: int, movie_credit_ids: set[int]) -> bool:
+        if self.status != "playing":
+            return False
+        
         if actor_id in self.actor_ids:
             return False
         matching_movie_ids = self.movie_ids.intersection(movie_credit_ids)
