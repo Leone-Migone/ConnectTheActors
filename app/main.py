@@ -1,10 +1,8 @@
 from uuid import uuid4
-
 from fastapi import FastAPI, HTTPException, status
-
+from fastapi.middleware.cors import CORSMiddleware
 from app.game_store import games
 from prototype.game import Game
-
 from app.schemas import GameCreate, GameResponse, MovieSubmission, ActorSubmission
 from prototype.tmdb_client import (
     get_movie_cast_ids,
@@ -18,6 +16,13 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from typing import Any
 
 class GameCreate(BaseModel):
     start_actor_id: int
