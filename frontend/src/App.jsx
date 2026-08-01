@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import GameScreen from "./components/GameScreen";
 import { createGame } from "./api";
 import ActorSearch from "./components/ActorSearch";
 
@@ -39,21 +39,15 @@ function App() {
   }
 
   if (game) {
-    return (
-      <main>
-        <h1>Connect the Actors</h1>
-
-        <p>
-          {startActor.name} → {targetActor.name}
-        </p>
-
-        <p>Lives: {game.lives}</p>
-        <p>Status: {game.status}</p>
-        <p>Game ID: {game.game_id}</p>
-      </main>
-    );
-  }
-
+  return (
+    <GameScreen
+      game={game}
+      setGame={setGame}
+      startActor={startActor}
+      targetActor={targetActor}
+    />
+  );
+}
   return (
     <main>
       <h1>Connect the Actors</h1>
@@ -83,5 +77,4 @@ function App() {
     </main>
   );
 }
-
 export default App;

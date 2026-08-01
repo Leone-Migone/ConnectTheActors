@@ -6,15 +6,6 @@ class GameCreate(BaseModel):
     target_actor_id: int
 
 
-class GameResponse(BaseModel):
-    game_id: str
-    start_actor_id: int
-    target_actor_id: int
-    lives: int
-    status: str
-    actor_ids: list[int]
-    movie_ids: list[int]
-    player_path: list[Any] | None
 
 
 class MovieSubmission(BaseModel):
@@ -22,3 +13,33 @@ class MovieSubmission(BaseModel):
 
 class ActorSubmission(BaseModel):
     actor_id: int
+
+
+class ActorDetails(BaseModel):
+    id: int
+    name: str
+    profile_path: str | None
+
+
+class MovieDetails(BaseModel):
+    id: int
+    title: str
+    release_date: str | None
+    poster_path: str | None
+
+
+class PathNode(BaseModel):
+    type: str
+    id: int
+    name: str
+    image_path: str | None
+
+class GameResponse(BaseModel):
+    game_id: str
+    start_actor_id: int
+    target_actor_id: int
+    lives: int
+    status: str
+    actors: list[ActorDetails]
+    movies: list[MovieDetails]
+    player_path: list[PathNode] | None

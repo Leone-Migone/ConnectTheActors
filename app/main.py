@@ -10,6 +10,20 @@ from prototype.tmdb_client import (
     search_movies,
     get_actor_movie_credit_ids
 )
+from app.game_store import (
+    games,
+    game_actor_details,
+    game_movie_details,
+)
+
+from prototype.tmdb_client import (
+    get_actor_details,
+    get_actor_movie_credit_ids,
+    get_movie_cast_ids,
+    get_movie_details,
+    search_actors,
+    search_movies,
+)
 
 app = FastAPI(
     title="Connect the Actors API",
@@ -42,7 +56,15 @@ def create_game(game_data: GameCreate):
         target_actor_id=game_data.target_actor_id,
     )
 
+
     games[game_id] = game
+
+    game_actor_details[game_id] = {
+        game.start_actor_id: get_actor_details(game.start_actor_id),
+        game.target_actor_id: get_actor_details(game.target_actor_id),
+    }
+
+    game_movie_details[game_id] = {}
 
     return build_game_response(game_id=game_id, game=game)
 
@@ -93,6 +115,11 @@ def add_movie_to_game(
         cast_actors_ids=cast_actor_ids,
     )
 
+    if added:
+        game_movie_details[game_id][submission.movie_id] = (
+            get_movie_details(submission.movie_id)
+        )
+
     return build_game_response(game_id= game_id, game = game) 
 
 
@@ -110,16 +137,47 @@ def add_actor_to_game(game_id:str,submission: ActorSubmission):
 
     added = game.add_actor(actor_id= submission.actor_id, movie_credit_ids= actor_movies_ids)
 
+    if added:
+        game_actor_details[game_id][submission.actor_id] = (
+            get_actor_details(submission.actor_id)
+        )
     return build_game_response(game_id= game_id, game = game) 
 
 def build_game_response(game_id: str, game: Game) -> GameResponse:
+    raw_path = game.find_player_path()
+    enriched_path = None
+
+    if raw_path is not None:
+        enriched_path = []
+
+        for node_type, node_id in raw_path:
+            if node_type == "actor":
+                actor = game_actor_details[game_id][node_id]
+
+                enriched_path.append({
+                    "type": "actor",
+                    "id": node_id,
+                    "name": actor["name"],
+                    "image_path": actor.get("profile_path"),
+                })
+
+            elif node_type == "movie":
+                movie = game_movie_details[game_id][node_id]
+
+                enriched_path.append({
+                    "type": "movie",
+                    "id": node_id,
+                    "name": movie["title"],
+                    "image_path": movie.get("poster_path"),
+                })
+
     return GameResponse(
         game_id=game_id,
         start_actor_id=game.start_actor_id,
         target_actor_id=game.target_actor_id,
         lives=game.lives,
         status=game.status,
-        actor_ids=list(game.actor_ids),
-        movie_ids=list(game.movie_ids),
-        player_path=game.find_player_path(),
+        actors=list(game_actor_details[game_id].values()),
+        movies=list(game_movie_details[game_id].values()),
+        player_path=enriched_path,
     )

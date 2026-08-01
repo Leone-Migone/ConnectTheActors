@@ -120,3 +120,38 @@ if __name__ == "__main__":
         cast_ids = get_movie_cast_ids(movie_id)
         print("Movie cast count:", len(cast_ids))
         print("Some actor IDs:", list(cast_ids)[:10])
+
+
+def get_actor_details(actor_id: int) -> dict:
+    response = requests.get(
+        f"{BASE_URL}/person/{actor_id}",
+        headers=HEADERS,
+        timeout=10,
+    )
+    response.raise_for_status()
+
+    actor = response.json()
+
+    return {
+        "id": actor["id"],
+        "name": actor["name"],
+        "profile_path": actor.get("profile_path"),
+    }
+
+
+def get_movie_details(movie_id: int) -> dict:
+    response = requests.get(
+        f"{BASE_URL}/movie/{movie_id}",
+        headers=HEADERS,
+        timeout=10,
+    )
+    response.raise_for_status()
+
+    movie = response.json()
+
+    return {
+        "id": movie["id"],
+        "title": movie["title"],
+        "release_date": movie.get("release_date"),
+        "poster_path": movie.get("poster_path"),
+    }
