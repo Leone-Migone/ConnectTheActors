@@ -170,7 +170,49 @@ def build_game_response(game_id: str, game: Game) -> GameResponse:
                     "name": movie["title"],
                     "image_path": movie.get("poster_path"),
                 })
+    
+    graph_nodes = []
 
+    for actor in game_actor_details[game_id].values():
+        graph_nodes.append(
+            {
+                "type": "actor",
+                "id": actor["id"],
+                "name": actor["name"],
+                "image_path": actor.get("profile_path"),
+            }
+        )
+
+    for movie in game_movie_details[game_id].values():
+        graph_nodes.append(
+            {
+                "type": "movie",
+                "id": movie["id"],
+                "name": movie["title"],
+                "image_path": movie.get("poster_path"),
+            }
+        )
+
+    graph_edges = []
+    seen_edges = set()
+
+    for current_node, neighbours in game.graph.items():
+        for neighbour in neighbours:
+            edge_key = frozenset((current_node, neighbour))
+
+            if edge_key in seen_edges:
+                continue
+
+            seen_edges.add(edge_key)
+
+            graph_edges.append(
+                {
+                    "from_type": current_node[0],
+                    "from_id": current_node[1],
+                    "to_type": neighbour[0],
+                    "to_id": neighbour[1],
+                }
+            )
     return GameResponse(
         game_id=game_id,
         start_actor_id=game.start_actor_id,
@@ -179,5 +221,7 @@ def build_game_response(game_id: str, game: Game) -> GameResponse:
         status=game.status,
         actors=list(game_actor_details[game_id].values()),
         movies=list(game_movie_details[game_id].values()),
+        graph_nodes=graph_nodes,
+        graph_edges=graph_edges,
         player_path=enriched_path,
     )

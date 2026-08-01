@@ -34,6 +34,19 @@ class PathNode(BaseModel):
     name: str
     image_path: str | None
 
+class GraphNode(BaseModel):
+    type: str
+    id: int
+    name: str
+    image_path: str | None
+
+
+class GraphEdge(BaseModel):
+    from_type: str
+    from_id: int
+    to_type: str
+    to_id: int
+    
 class GameResponse(BaseModel):
     game_id: str
     start_actor_id: int
@@ -42,4 +55,7 @@ class GameResponse(BaseModel):
     status: str
     actors: list[ActorDetails]
     movies: list[MovieDetails]
+    graph_nodes: list[GraphNode]
+    graph_edges: list[GraphEdge]
     player_path: list[PathNode] | None
+

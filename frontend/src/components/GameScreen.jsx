@@ -1,4 +1,5 @@
 import { useState } from "react";
+import GraphBoard from "./GraphBoard";
 
 import {
   searchActors,
@@ -169,57 +170,12 @@ function GameScreen({
 <p>Actors added: {game.actors.length}</p>
 <p>Movies added: {game.movies.length}</p>
 
-<section>
-  <h2>Actors in your graph</h2>
 
-  <div>
-    {game.actors.map((actor) => (
-      <div key={actor.id}>
-        {actor.profile_path ? (
-          <img
-            src={`${TMDB_IMAGE_BASE_URL}${actor.profile_path}`}
-            alt={actor.name}
-            width="150"
-          />
-        ) : (
-          <div>No image available</div>
-        )}
-
-        <p>
-          <strong>{actor.name}</strong>
-        </p>
-      </div>
-    ))}
-  </div>
-</section>
-
-<section>
-  <h2>Movies in your graph</h2>
-
-  <div>
-    {game.movies.map((movie) => (
-      <div key={movie.id}>
-        {movie.poster_path ? (
-          <img
-            src={`${TMDB_IMAGE_BASE_URL}${movie.poster_path}`}
-            alt={movie.title}
-            width="150"
-          />
-        ) : (
-          <div>No image available</div>
-        )}
-
-        <p>
-          <strong>{movie.title}</strong>
-        </p>
-
-        {movie.release_date && (
-          <p>{movie.release_date.slice(0, 4)}</p>
-        )}
-      </div>
-    ))}
-  </div>
-</section>
+<GraphBoard
+  nodes={game.graph_nodes ?? []}
+  edges={game.graph_edges ?? []}
+  startActorId={game.start_actor_id}
+/>
 
 {game.player_path && (
   <section>
