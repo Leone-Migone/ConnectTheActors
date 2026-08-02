@@ -1,5 +1,8 @@
 import { useState } from "react";
+
+import GameHeader from "./GameHeader";
 import GraphBoard from "./GraphBoard";
+import GameResult from "./GameResult";
 
 import {
   searchActors,
@@ -8,22 +11,24 @@ import {
   submitMovie,
 } from "../api";
 
+const TMDB_IMAGE_BASE_URL =
+  "https://image.tmdb.org/t/p/w300";
+
 function GameScreen({
   game,
   setGame,
   startActor,
   targetActor,
+  onMainMenu,
+  onPlayAgain,
 }) {
   const [searchType, setSearchType] = useState("actor");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w300";
 
   async function handleSearch() {
-    console.log("FULL GAME:", game);
-    console.log("PLAYER PATH:", game.player_path);
     if (!query.trim()) {
       return;
     }
@@ -77,148 +82,167 @@ function GameScreen({
     }
   }
 
+  function handleSearchTypeChange(type) {
+    setSearchType(type);
+    setResults([]);
+    setQuery("");
+    setMessage("");
+  }
+
   return (
-    <main>
-      <h1>Connect the Actors</h1>
-
-      <p>
-        <strong>{startActor.name}</strong>
-        {" → "}
-        <strong>{targetActor.name}</strong>
-      </p>
-
-      <p>Lives: {game.lives}</p>
-      <p>Status: {game.status}</p>
+    <main className="game-screen">
+      <GameHeader
+        startActor={startActor}
+        targetActor={targetActor}
+        lives={game.lives}
+        status={game.status}
+      />
 
       {game.status === "playing" && (
-        <>
-          <div>
+        <section className="game-search-panel">
+          <div className="search-tabs">
             <button
+              className={
+                searchType === "actor"
+                  ? "search-tab search-tab--active"
+                  : "search-tab"
+              }
               type="button"
-              onClick={() => {
-                setSearchType("actor");
-                setResults([]);
-              }}
+              onClick={() =>
+                handleSearchTypeChange("actor")
+              }
             >
-              Search actors
+              Actors
             </button>
 
             <button
+              className={
+                searchType === "movie"
+                  ? "search-tab search-tab--active"
+                  : "search-tab"
+              }
               type="button"
-              onClick={() => {
-                setSearchType("movie");
-                setResults([]);
-              }}
+              onClick={() =>
+                handleSearchTypeChange("movie")
+              }
             >
-              Search movies
+              Movies
             </button>
           </div>
 
-          <p>
-            Currently searching for:{" "}
-            <strong>{searchType}</strong>
-          </p>
+          <div className="game-search-panel__body">
+            <div className="game-search-controls">
+              <input
+                className="game-search-input"
+                type="text"
+                value={query}
+                placeholder={`Search for a ${searchType}`}
+                onChange={(event) =>
+                  setQuery(event.target.value)
+                }
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+              />
 
-          <input
-            type="text"
-            value={query}
-            placeholder={`Search for a ${searchType}`}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                handleSearch();
-              }
-            }}
-          />
+              <button
+                className="game-search-button"
+                type="button"
+                onClick={handleSearch}
+                disabled={isLoading || !query.trim()}
+              >
+                {isLoading
+                  ? "Searching..."
+                  : "Search"}
+              </button>
+            </div>
 
-          <button
-            type="button"
-            onClick={handleSearch}
-            disabled={isLoading}
-          >
-            {isLoading ? "Loading..." : "Search"}
-          </button>
+            {results.length > 0 && (
+              <div className="game-search-results">
+                {results.map((result) => {
+                  const imagePath =
+                    searchType === "actor"
+                      ? result.profile_path
+                      : result.poster_path;
 
-          <ul>
-            {results.map((result) => (
-              <li key={result.id}>
-                <button
-                  type="button"
-                  onClick={() => handleSelection(result)}
-                  disabled={isLoading}
-                >
-                  {searchType === "actor"
-                    ? result.name
-                    : `${result.title} ${
-                        result.release_date
-                          ? `(${result.release_date.slice(0, 4)})`
-                          : ""
-                      }`}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
+                  const displayName =
+                    searchType === "actor"
+                      ? result.name
+                      : result.title;
+
+                  const secondaryText =
+                    searchType === "movie" &&
+                    result.release_date
+                      ? result.release_date.slice(0, 4)
+                      : searchType === "actor"
+                        ? "Actor"
+                        : "Movie";
+
+                  return (
+                    <button
+                      className="game-search-result"
+                      key={result.id}
+                      type="button"
+                      onClick={() =>
+                        handleSelection(result)
+                      }
+                      disabled={isLoading}
+                    >
+                      {imagePath ? (
+                        <img
+                          className="game-search-result__image"
+                          src={`${TMDB_IMAGE_BASE_URL}${imagePath}`}
+                          alt={displayName}
+                        />
+                      ) : (
+                        <div className="game-search-result__image game-search-result__placeholder">
+                          ?
+                        </div>
+                      )}
+
+                      <span className="game-search-result__details">
+                        <strong>{displayName}</strong>
+                        <small>{secondaryText}</small>
+                      </span>
+
+                      <span className="game-search-result__action">
+                        Add
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
       )}
 
-      {message && <p>{message}</p>}
+      {message && (
+        <p
+          className={`game-message game-message--${game.status}`}
+        >
+          {message}
+        </p>
+      )}
+      {game.status == "playing" && ( 
+        <GraphBoard
+          nodes={game.graph_nodes ?? []}
+          edges={game.graph_edges ?? []}
+          startActorId={game.start_actor_id}
+        />
+      )}
 
-      <h2>Current game state</h2>
-
-      <h2>Current game state</h2>
-
-<p>Actors added: {game.actors.length}</p>
-<p>Movies added: {game.movies.length}</p>
-
-
-<GraphBoard
-  nodes={game.graph_nodes ?? []}
-  edges={game.graph_edges ?? []}
-  startActorId={game.start_actor_id}
-/>
-
-{game.player_path && (
-  <section>
-    <h2>Player path</h2>
-
-    <div>
-      {game.player_path.map((node, index) => {
-        const imagePath =
-          node.image_path ??
-          node.profile_path ??
-          node.poster_path;
-
-        const displayName = node.name ?? node.title;
-
-        return (
-          <div key={`${node.type}-${node.id}`}>
-            {imagePath ? (
-              <img
-                src={`${TMDB_IMAGE_BASE_URL}${imagePath}`}
-                alt={displayName}
-                width="150"
-              />
-            ) : (
-              <div>No image available</div>
-            )}
-
-            <p>
-              <strong>{displayName}</strong>
-            </p>
-
-            <p>
-              {node.type === "actor" ? "Actor" : "Movie"}
-            </p>
-
-            {index < game.player_path.length - 1 && <p>↓</p>}
-          </div>
-        );
-      })}
-    </div>
-  </section>
-)}
+      {game.status !== "playing" && (
+        <GameResult
+          status={game.status}
+          playerPath={game.player_path}
+          onPlayAgain={onPlayAgain}
+          onMainMenu={onMainMenu}
+        />
+      )}
     </main>
   );
 }
-
 export default GameScreen;

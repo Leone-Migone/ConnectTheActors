@@ -3,6 +3,24 @@ import GameScreen from "./components/GameScreen";
 import { createGame } from "./api";
 import ActorSearch from "./components/ActorSearch";
 
+function SiteHeader() {
+  return (
+    <header className="site-header">
+      <div className="site-brand">
+        <span className="site-brand__mark">
+          <span className="site-brand__dot site-brand__dot--green" />
+          <span className="site-brand__dot site-brand__dot--orange" />
+          <span className="site-brand__dot site-brand__dot--blue" />
+        </span>
+
+        <span className="site-brand__name">
+          Connect the Actors
+        </span>
+      </div>
+    </header>
+  );
+}
+
 function App() {
   const [startActor, setStartActor] = useState(null);
   const [targetActor, setTargetActor] = useState(null);
@@ -40,41 +58,97 @@ function App() {
 
   if (game) {
   return (
-    <GameScreen
-      game={game}
-      setGame={setGame}
-      startActor={startActor}
-      targetActor={targetActor}
+    <div className="app-shell">
+      <SiteHeader />
+
+      <GameScreen
+        game={game}
+        setGame={setGame}
+        startActor={startActor}
+        targetActor={targetActor}
+        onMainMenu={() => {
+          setGame(null);
+          setStartActor(null);
+          setTargetActor(null);
+          setError("");
+      }}
+      onPlayAgain={() => {
+        setGame(null);
+        setError("");
+      }}
     />
+    </div>
   );
 }
   return (
-    <main>
-      <h1>Connect the Actors</h1>
-      <p>Select two actors to begin.</p>
+  <div className="app-shell">
+    <SiteHeader />
 
-      <ActorSearch
-        label="Starting actor"
-        selectedActor={startActor}
-        onSelect={setStartActor}
-      />
+    <main className="start-screen">
+      <section className="start-screen__intro">
+        <p className="eyebrow">A movie connection game</p>
 
-      <ActorSearch
-        label="Target actor"
-        selectedActor={targetActor}
-        onSelect={setTargetActor}
-      />
+        <h1 className="start-screen__title">
+          Find the link between{" "}
+          <span className="start-screen__accent">
+            any two actors.
+          </span>
+        </h1>
 
-      {error && <p>{error}</p>}
+        <p className="start-screen__description">
+          Build a path through films and co-stars before you
+          run out of lives.
+        </p>
+      </section>
 
-      <button
-        type="button"
-        onClick={handleCreateGame}
-        disabled={!startActor || !targetActor || isCreating}
-      >
-        {isCreating ? "Creating game..." : "Start game"}
-      </button>
+      <section className="setup-panel">
+        <div className="setup-panel__header">
+          <h2 className="setup-panel__title">
+            Start a new game
+          </h2>
+
+          <p className="setup-panel__description">
+            Choose two different actors to connect.
+          </p>
+        </div>
+
+        <div className="setup-panel__searches">
+          <ActorSearch
+            label="Starting actor"
+            selectedActor={startActor}
+            onSelect={setStartActor}
+          />
+
+          <div className="setup-panel__arrow">↓</div>
+
+          <ActorSearch
+            label="Target actor"
+            selectedActor={targetActor}
+            onSelect={setTargetActor}
+          />
+        </div>
+
+        {error && (
+          <p className="error-message">{error}</p>
+        )}
+
+        <button
+          className="primary-button"
+          type="button"
+          onClick={handleCreateGame}
+          disabled={
+            !startActor ||
+            !targetActor ||
+            isCreating
+          }
+        >
+          {isCreating
+            ? "Creating game..."
+            : "Start game"}
+        </button>
+      </section>
     </main>
-  );
+  </div>
+);
 }
 export default App;
