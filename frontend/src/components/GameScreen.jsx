@@ -26,6 +26,7 @@ function GameScreen({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("info");
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSearch() {
@@ -36,6 +37,7 @@ function GameScreen({
     try {
       setIsLoading(true);
       setMessage("");
+      setMessageType("info");
 
       const searchResults =
         searchType === "actor"
@@ -43,7 +45,9 @@ function GameScreen({
           : await searchMovies(query);
 
       setResults(searchResults.slice(0, 5));
-    } catch {
+    } catch (error) {
+      console.error(error);
+      setMessageType("error");
       setMessage("Search failed.");
     } finally {
       setIsLoading(false);
@@ -54,28 +58,82 @@ function GameScreen({
     try {
       setIsLoading(true);
       setMessage("");
+      setMessageType("info");
 
-      const updatedGame =
+      const submissionResponse =
         searchType === "actor"
           ? await submitActor(game.game_id, result.id)
           : await submitMovie(game.game_id, result.id);
+
+      const updatedGame = submissionResponse.game;
+      const submissionResult = submissionResponse.result;
 
       setGame(updatedGame);
       setResults([]);
       setQuery("");
 
       if (updatedGame.status === "won") {
+        setMessageType("success");
         setMessage("You connected the actors!");
-      } else if (updatedGame.status === "lost") {
-        setMessage("You lost all three lives.");
-      } else if (updatedGame.added === false) {
-        setMessage("That selection could not be added.");
-      } else {
-        setMessage(
-          `${searchType === "actor" ? "Actor" : "Movie"} added.`
-        );
+        return;
       }
-    } catch {
+
+      if (updatedGame.status === "lost") {
+        setMessageType("error");
+        setMessage("You lost all three lives.");
+        return;
+      }
+
+      if (submissionResult === "added") {
+        const itemName =
+          searchType === "actor"
+            ? result.name
+            : result.title;
+
+        setMessageType("success");
+        setMessage(`${itemName} was added to your graph.`);
+        return;
+      }
+
+      if (submissionResult === "invalid") {
+        setMessageType("error");
+
+        if (searchType === "actor") {
+          setMessage(
+            `${result.name} is not connected to any movie currently in your graph. You lost one life.`
+          );
+        } else {
+          setMessage(
+            `${result.title} does not contain any actor currently in your graph. You lost one life.`
+          );
+        }
+
+        return;
+      }
+
+      if (submissionResult === "duplicate") {
+        setMessageType("warning");
+
+        if (searchType === "actor") {
+          setMessage(
+            `${result.name} is already in your graph.`
+          );
+        } else {
+          setMessage(
+            `${result.title} is already in your graph.`
+          );
+        }
+
+        return;
+      }
+
+      if (submissionResult === "game_finished") {
+        setMessageType("warning");
+        setMessage("This game has already finished.");
+      }
+    } catch (error) {
+      console.error(error);
+      setMessageType("error");
       setMessage("Could not submit selection.");
     } finally {
       setIsLoading(false);
@@ -87,6 +145,7 @@ function GameScreen({
     setResults([]);
     setQuery("");
     setMessage("");
+    setMessageType("info");
   }
 
   return (
@@ -221,12 +280,14 @@ function GameScreen({
 
       {message && (
         <p
-          className={`game-message game-message--${game.status}`}
+          className={`game-message game-message--${messageType}`}
+          role="status"
         >
           {message}
         </p>
       )}
-      {game.status == "playing" && ( 
+
+      {game.status === "playing" && (
         <GraphBoard
           nodes={game.graph_nodes ?? []}
           edges={game.graph_edges ?? []}
@@ -245,4 +306,5 @@ function GameScreen({
     </main>
   );
 }
+
 export default GameScreen;

@@ -15,19 +15,19 @@ class Game:
             ("actor", target_actor_id): set(),
         }
     #passing in movie id and set of actor ids that were in the movie, if any of those actors are already in the graph then add the movie to the graph and link them to the actors
-    def add_movie(self, movie_id: int, cast_actors_ids: set[int]) -> bool:
+    def add_movie(self, movie_id: int, cast_actors_ids: set[int]) -> str:
         if self.status != "playing":
-            return False
+            return "game_finished"
         
         if movie_id in self.movie_ids:
-            return False
+            return "duplicate"
         matching_actor_ids = self.actor_ids.intersection(cast_actors_ids)
 
         if not matching_actor_ids:
             self.lives -= 1
             if self.lives  <= 0:
                 self.status = "lost"
-            return False
+            return "invalid"
         
         self.movie_ids.add(movie_id)
         movie_node = ("movie", movie_id)
@@ -42,22 +42,22 @@ class Game:
 
         if self.is_connected():
             self.status = "won"
-        return True
+        return "added"
         
     #passing in actor id and set of movie ids that actor has been in, if any of those movies are already in the graph then add the actor to the graph and link them to the movies
-    def add_actor(self, actor_id: int, movie_credit_ids: set[int]) -> bool:
+    def add_actor(self, actor_id: int, movie_credit_ids: set[int]) -> str:
         if self.status != "playing":
-            return False
+            return "game_finished"
         
         if actor_id in self.actor_ids:
-            return False
+            return "duplicate"
         matching_movie_ids = self.movie_ids.intersection(movie_credit_ids)
 
         if not matching_movie_ids:
             self.lives -= 1
             if self.lives <= 0:
                 self.status = "lost"
-            return False
+            return "invalid"
     
         self.actor_ids.add(actor_id)
         actor_node = ("actor",actor_id)
@@ -70,7 +70,7 @@ class Game:
         
         if self.is_connected():
             self.status = "won"
-        return True
+        return "added"
 
     def find_player_path(self):
         start_node = ("actor", self.start_actor_id)

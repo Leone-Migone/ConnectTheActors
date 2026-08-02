@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 from typing import Any
+from typing import Literal
+
 
 class GameCreate(BaseModel):
     start_actor_id: int
@@ -59,3 +61,11 @@ class GameResponse(BaseModel):
     graph_edges: list[GraphEdge]
     player_path: list[PathNode] | None
 
+class SubmissionResponse(BaseModel):
+    result: Literal[
+        "added",
+        "invalid",
+        "duplicate",
+        "game_finished",
+    ]
+    game: GameResponse

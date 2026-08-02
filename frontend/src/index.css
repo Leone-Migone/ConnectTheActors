@@ -865,16 +865,6 @@ img {
   color: var(--text-soft);
 }
 
-.game-message--won {
-  border: 1px solid rgba(0, 192, 48, 0.35);
-  color: var(--green);
-}
-
-.game-message--lost {
-  border: 1px solid rgba(231, 76, 60, 0.4);
-  color: #ff8c82;
-}
-
 @media (max-width: 680px) {
   .game-header__top {
     flex-direction: column;
@@ -1092,4 +1082,35 @@ img {
   .game-result__button {
     width: 100%;
   }
+}
+.game-message {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 9px;
+  background: var(--surface);
+  font-weight: 600;
+}
+
+.game-message--info {
+  border: 1px solid rgba(64, 188, 244, 0.4);
+  background: rgba(64, 188, 244, 0.1);
+  color: var(--blue);
+}
+
+.game-message--success {
+  border: 1px solid rgba(0, 192, 48, 0.4);
+  background: rgba(0, 192, 48, 0.1);
+  color: var(--green);
+}
+
+.game-message--warning {
+  border: 1px solid rgba(255, 128, 0, 0.45);
+  background: rgba(255, 128, 0, 0.1);
+  color: var(--orange);
+}
+
+.game-message--error {
+  border: 1px solid rgba(231, 76, 60, 0.45);
+  background: rgba(231, 76, 60, 0.1);
+  color: #ff8c82;
 }

@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from app.game_store import games
 from prototype.game import Game
-from app.schemas import GameCreate, GameResponse, MovieSubmission, ActorSubmission
+from app.schemas import GameCreate, GameResponse, MovieSubmission, ActorSubmission, SubmissionResponse
 from prototype.tmdb_client import (
     get_movie_cast_ids,
     search_actors,
@@ -96,10 +96,7 @@ def movie_search(query: str):
 
 
 @app.post("/games/{game_id}/movies")
-def add_movie_to_game(
-    game_id: str,
-    submission: MovieSubmission,
-):
+def add_movie_to_game(game_id: str, submission: MovieSubmission) -> SubmissionResponse:
     game = games.get(game_id)
 
     if game is None:
@@ -115,17 +112,17 @@ def add_movie_to_game(
         cast_actors_ids=cast_actor_ids,
     )
 
-    if added:
+    if added == "added":
         game_movie_details[game_id][submission.movie_id] = (
             get_movie_details(submission.movie_id)
         )
 
-    return build_game_response(game_id= game_id, game = game) 
+    return SubmissionResponse(result=added, game=build_game_response(game_id=game_id, game=game)) 
 
 
 
 @app.post("/games/{game_id}/actors")
-def add_actor_to_game(game_id:str,submission: ActorSubmission):
+def add_actor_to_game(game_id:str,submission: ActorSubmission) -> SubmissionResponse:
     game = games.get(game_id)
     if game is None:
         raise HTTPException(
@@ -137,11 +134,11 @@ def add_actor_to_game(game_id:str,submission: ActorSubmission):
 
     added = game.add_actor(actor_id= submission.actor_id, movie_credit_ids= actor_movies_ids)
 
-    if added:
+    if added == "added":
         game_actor_details[game_id][submission.actor_id] = (
             get_actor_details(submission.actor_id)
         )
-    return build_game_response(game_id= game_id, game = game) 
+    return SubmissionResponse(result=added, game=build_game_response(game_id=game_id, game=game))
 
 def build_game_response(game_id: str, game: Game) -> GameResponse:
     raw_path = game.find_player_path()
