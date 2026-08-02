@@ -616,23 +616,3 @@ The first release will not include:
 * daily challenges;
 * social sharing;
 * complex animated graph visualisations.
-
-## Learning goals
-
-The parts of the project that should be understood deeply include:
-
-* bipartite graphs;
-* adjacency representations;
-* breadth-first search;
-* queues;
-* visited sets;
-* parent tracking;
-* path reconstruction;
-* API request handling;
-* backend validation;
-* Pydantic models;
-* frontend-backend communication;
-* database modelling;
-* testing and edge cases.
-
-The project is intentionally being developed incrementally, with AI used as a mentor rather than as a replacement for understanding the implementation.
