@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import "@xyflow/react/dist/style.css";
+import dagre from "@dagrejs/dagre";
 
 import {
   Background,
@@ -16,16 +16,33 @@ const nodeTypes = {
   actorMovie: ActorMovieNode,
 };
 
+const NODE_WIDTH = 150;
+const NODE_HEIGHT = 270;
+
 function GraphBoard({
   nodes = [],
   edges = [],
-  startActorId,
 }) {
-  const reactFlowNodes = useMemo(() => {
-    return buildFlowNodes(nodes, edges, startActorId);
-  }, [nodes, edges, startActorId]);
+  const baseNodes = useMemo(() => {
+    return nodes.map((node) => ({
+      id: `${node.type}-${node.id}`,
+      type: "actorMovie",
 
-  const reactFlowEdges = useMemo(() => {
+      // Dagre will replace this initial position.
+      position: {
+        x: 0,
+        y: 0,
+      },
+
+      data: {
+        name: node.name,
+        type: node.type,
+        imagePath: node.image_path,
+      },
+    }));
+  }, [nodes]);
+
+  const baseEdges = useMemo(() => {
     return edges.map((edge, index) => ({
       id: `edge-${index}`,
       source: `${edge.from_type}-${edge.from_id}`,
@@ -34,16 +51,26 @@ function GraphBoard({
     }));
   }, [edges]);
 
+  const layoutedElements = useMemo(() => {
+    return getLayoutedElements(
+      baseNodes,
+      baseEdges
+    );
+  }, [baseNodes, baseEdges]);
+
   return (
     <section>
       <h2>Your graph</h2>
 
       <div className="flow-board">
         <ReactFlow
-          nodes={reactFlowNodes}
-          edges={reactFlowEdges}
+          nodes={layoutedElements.nodes}
+          edges={layoutedElements.edges}
           nodeTypes={nodeTypes}
           fitView
+          fitViewOptions={{
+            padding: 0.2,
+          }}
           nodesDraggable
           nodesConnectable={false}
           elementsSelectable
@@ -57,92 +84,66 @@ function GraphBoard({
   );
 }
 
-function buildFlowNodes(nodes, edges, startActorId) {
-  const levels = calculateNodeLevels(
-    nodes,
-    edges,
-    startActorId
-  );
+function getLayoutedElements(nodes, edges) {
+  const dagreGraph =
+    new dagre.graphlib.Graph();
 
-  const nodesByLevel = new Map();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+  dagreGraph.setGraph({
+    // LR means left to right.
+    rankdir: "LR",
+
+    // Horizontal distance between graph levels.
+    ranksep: 110,
+
+    // Vertical distance between nodes on the same level.
+    nodesep: 60,
+
+    marginx: 30,
+    marginy: 30,
+  });
 
   for (const node of nodes) {
-    const nodeKey = `${node.type}-${node.id}`;
-    const level = levels.get(nodeKey) ?? 0;
-
-    if (!nodesByLevel.has(level)) {
-      nodesByLevel.set(level, []);
-    }
-
-    nodesByLevel.get(level).push(node);
-  }
-
-  const flowNodes = [];
-
-  for (const [level, levelNodes] of nodesByLevel) {
-    levelNodes.forEach((node, rowIndex) => {
-      flowNodes.push({
-        id: `${node.type}-${node.id}`,
-        type: "actorMovie",
-        position: {
-          x: level * 260,
-          y: rowIndex * 300,
-        },
-        data: {
-          name: node.name,
-          type: node.type,
-          imagePath: node.image_path,
-        },
-      });
+    dagreGraph.setNode(node.id, {
+      width: NODE_WIDTH,
+      height: NODE_HEIGHT,
     });
   }
 
-  return flowNodes;
-}
-
-function calculateNodeLevels(
-  nodes,
-  edges,
-  startActorId
-) {
-  const adjacencyList = new Map();
-
-  for (const node of nodes) {
-    adjacencyList.set(`${node.type}-${node.id}`, []);
-  }
-
   for (const edge of edges) {
-    const fromKey =
-      `${edge.from_type}-${edge.from_id}`;
-
-    const toKey =
-      `${edge.to_type}-${edge.to_id}`;
-
-    adjacencyList.get(fromKey)?.push(toKey);
-    adjacencyList.get(toKey)?.push(fromKey);
+    dagreGraph.setEdge(
+      edge.source,
+      edge.target
+    );
   }
 
-  const startKey = `actor-${startActorId}`;
-  const levels = new Map([[startKey, 0]]);
-  const queue = [startKey];
+  dagre.layout(dagreGraph);
 
-  while (queue.length > 0) {
-    const currentKey = queue.shift();
-    const currentLevel = levels.get(currentKey);
+  const layoutedNodes = nodes.map((node) => {
+    const dagrePosition =
+      dagreGraph.node(node.id);
 
-    for (
-      const neighbourKey of adjacencyList.get(currentKey) ?? []
-    ) {
-      if (levels.has(neighbourKey)) {
-        continue;
-      }
+    return {
+      ...node,
 
-      levels.set(neighbourKey, currentLevel + 1);
-      queue.push(neighbourKey);
-    }
-  }
+      // Dagre gives the centre of the node.
+      // React Flow expects the top-left corner.
+      position: {
+        x:
+          dagrePosition.x -
+          NODE_WIDTH / 2,
+        y:
+          dagrePosition.y -
+          NODE_HEIGHT / 2,
+      },
+    };
+  });
 
-  return levels;
+  return {
+    nodes: layoutedNodes,
+    edges,
+  };
 }
 
 export default GraphBoard;
