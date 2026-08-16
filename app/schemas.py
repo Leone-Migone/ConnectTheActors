@@ -69,3 +69,7 @@ class SubmissionResponse(BaseModel):
         "game_finished",
     ]
     game: GameResponse
+
+class RandomActorsResponse(BaseModel):
+    start_actor: ActorDetails
+    target_actor: ActorDetails

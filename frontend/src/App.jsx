@@ -1,7 +1,8 @@
 import { useState } from "react";
 import GameScreen from "./components/GameScreen";
-import { createGame } from "./api";
+import { createGame, getRandomActors } from "./api";
 import ActorSearch from "./components/ActorSearch";
+
 
 function SiteHeader() {
   return (
@@ -27,7 +28,23 @@ function App() {
   const [game, setGame] = useState(null);
   const [error, setError] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [isRandomizing, setIsRandomizing] = useState(false);
+  async function handleRandomizeActors() {
+    try {
+      setIsRandomizing(true);
+      setError("");
 
+      const randomActors = await getRandomActors();
+
+      setStartActor(randomActors.start_actor);
+      setTargetActor(randomActors.target_actor);
+    } catch (error) {
+      console.error(error);
+      setError("Could not generate a random challenge.");
+    } finally {
+      setIsRandomizing(false);
+    }
+  }
   async function handleCreateGame() {
     if (!startActor || !targetActor) {
       setError("Select both actors first.");
@@ -131,6 +148,17 @@ function App() {
         {error && (
           <p className="error-message">{error}</p>
         )}
+
+        <button
+          className="random-button"
+          type="button"
+          onClick={handleRandomizeActors}
+          disabled={isRandomizing || isCreating}
+        >
+          {isRandomizing
+          ? "Choosing actors..."
+          : "Random challenge"}
+        </button>
 
         <button
           className="primary-button"

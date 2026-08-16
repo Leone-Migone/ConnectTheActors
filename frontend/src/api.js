@@ -84,3 +84,15 @@ export async function submitMovie(gameId, movieId) {
 
   return response.json();
 }
+
+export async function getRandomActors() {
+  const response = await fetch(
+    `${API_BASE_URL}/actors/random`
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not generate random actors");
+  }
+
+  return response.json();
+}

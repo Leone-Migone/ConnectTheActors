@@ -1114,3 +1114,28 @@ img {
   background: rgba(231, 76, 60, 0.1);
   color: #ff8c82;
 }
+
+.random-button {
+  width: 100%;
+  margin-top: 24px;
+  padding: 12px 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background-soft);
+  color: var(--text);
+  font-weight: 800;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.random-button:hover:not(:disabled) {
+  border-color: var(--orange);
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+}
+
+.random-button + .primary-button {
+  margin-top: 10px;
+}

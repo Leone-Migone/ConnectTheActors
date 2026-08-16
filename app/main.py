@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from app.game_store import games
 from prototype.game import Game
-from app.schemas import GameCreate, GameResponse, MovieSubmission, ActorSubmission, SubmissionResponse
+from app.schemas import GameCreate, GameResponse, MovieSubmission, ActorSubmission, SubmissionResponse, RandomActorsResponse
 from prototype.tmdb_client import (
     get_movie_cast_ids,
     search_actors,
@@ -24,6 +24,8 @@ from prototype.tmdb_client import (
     search_actors,
     search_movies,
 )
+import random
+from app.famous_actors import FAMOUS_ACTOR_IDS
 
 app = FastAPI(
     title="Connect the Actors API",
@@ -221,4 +223,19 @@ def build_game_response(game_id: str, game: Game) -> GameResponse:
         graph_nodes=graph_nodes,
         graph_edges=graph_edges,
         player_path=enriched_path,
+    )
+
+@app.get(
+    "/actors/random",
+    response_model=RandomActorsResponse,
+)
+def get_random_actors() -> RandomActorsResponse:
+    start_actor_id, target_actor_id = random.sample(
+        FAMOUS_ACTOR_IDS,
+        k=2,
+    )
+
+    return RandomActorsResponse(
+        start_actor=get_actor_details(start_actor_id),
+        target_actor=get_actor_details(target_actor_id),
     )
