@@ -5,7 +5,16 @@ const TMDB_IMAGE_BASE_URL =
 
 function ActorMovieNode({ data }) {
   return (
-    <article className={`flow-node flow-node--${data.type}`}>
+    <article
+      className={[
+      "flow-node",
+      `flow-node--${data.type}`,
+      data.isInPath ? "flow-node--path" : "",
+      data.isDimmed ? "flow-node--dimmed" : "",
+    ]
+      .filter(Boolean)
+      .join(" ")}
+    >
       <Handle
         type="target"
         position={Position.Left}

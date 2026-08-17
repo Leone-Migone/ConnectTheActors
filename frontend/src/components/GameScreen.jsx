@@ -287,13 +287,12 @@ function GameScreen({
         </p>
       )}
 
-      {game.status === "playing" && (
-        <GraphBoard
-          nodes={game.graph_nodes ?? []}
-          edges={game.graph_edges ?? []}
-          startActorId={game.start_actor_id}
-        />
-      )}
+      <GraphBoard
+        nodes={game.graph_nodes ?? []}
+        edges={game.graph_edges ?? []}
+        playerPath={game.player_path ?? []}
+        gameStatus={game.status}
+      />    
 
       {game.status !== "playing" && (
         <GameResult

@@ -1148,3 +1148,32 @@ img {
 .random-button + .primary-button {
   margin-top: 10px;
 }
+
+
+.flow-node {
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.flow-node--path {
+  opacity: 1;
+  transform: scale(1.04);
+  box-shadow:
+    0 0 0 2px rgba(0, 192, 48, 0.35),
+    0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.flow-node--dimmed {
+  opacity: 0.25;
+}
+
+.graph-edge--path .react-flow__edge-path {
+  stroke: var(--green);
+  stroke-width: 4;
+}
+
+.graph-edge--dimmed {
+  opacity: 0.15;
+}
