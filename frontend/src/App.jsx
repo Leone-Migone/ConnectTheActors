@@ -4,10 +4,15 @@ import { createGame, getRandomActors } from "./api";
 import ActorSearch from "./components/ActorSearch";
 
 
-function SiteHeader() {
+function SiteHeader({onHome}) {
   return (
     <header className="site-header">
-      <div className="site-brand">
+      <button
+        type="button"
+        className="site-brand"
+        onClick={onHome}
+        aria-Label="Go to home"
+      >
         <span className="site-brand__mark">
           <span className="site-brand__dot site-brand__dot--green" />
           <span className="site-brand__dot site-brand__dot--orange" />
@@ -17,7 +22,7 @@ function SiteHeader() {
         <span className="site-brand__name">
           Connect the Actors
         </span>
-      </div>
+      </button>
     </header>
   );
 }
@@ -29,6 +34,15 @@ function App() {
   const [error, setError] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [isRandomizing, setIsRandomizing] = useState(false);
+  
+
+  function handleMainMenu() {
+    setGame(null);
+    setStartActor(null);
+    setTargetActor(null);
+    setError("");
+  }
+
   async function handleRandomizeActors() {
     try {
       setIsRandomizing(true);
@@ -76,7 +90,7 @@ function App() {
   if (game) {
   return (
     <div className="app-shell">
-      <SiteHeader />
+      <SiteHeader onHome={handleMainMenu} />
 
       <GameScreen
         game={game}
@@ -99,7 +113,7 @@ function App() {
 }
   return (
   <div className="app-shell">
-    <SiteHeader />
+    <SiteHeader onHome={handleMainMenu} />
 
     <main className="start-screen">
       <section className="start-screen__intro">

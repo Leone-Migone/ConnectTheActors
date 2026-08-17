@@ -101,11 +101,20 @@ img {
 }
 
 .site-brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 12px;
-  color: var(--text);
-  text-decoration: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+
+  cursor: pointer;
+}
+
+.site-brand:hover .site-brand__name {
+  opacity: 0.8;
 }
 
 .site-brand__mark {
