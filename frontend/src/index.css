@@ -384,12 +384,14 @@ img {
 
 .flow-board {
   width: 100%;
+  max-width: 100%;
   height: 620px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   margin-top: 20px;
   border: 1px solid var(--border-soft);
   border-radius: 14px;
-  background: #101519;
+  background: var(--background-soft);
 }
 
 .flow-node {
@@ -1176,4 +1178,47 @@ img {
 
 .graph-edge--dimmed {
   opacity: 0.15;
+}
+
+.app-shell {
+  max-width: 1180px;
+  overflow-x: hidden;
+}
+
+.game-screen {
+  width: 100%;
+  min-width: 0;
+}
+
+.game-screen > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.graph-section {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.flow-board {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.game-result {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.result-path {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
