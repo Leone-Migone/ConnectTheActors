@@ -1,0 +1,233 @@
+from prototype.tmdb_client import search_actors
+
+FAMOUS_ACTOR_NAMES = [
+    "George Clooney",
+    "Julia Roberts",
+    "Nicole Kidman",
+    "Cate Blanchett",
+    "Natalie Portman",
+    "Keanu Reeves",
+    "Will Smith",
+    "Samuel L. Jackson",
+    "Joaquin Phoenix",
+    "Ryan Gosling",
+    "Jake Gyllenhaal",
+    "Amy Adams",
+    "Jessica Chastain",
+    "Viola Davis",
+    "Octavia Spencer",
+    "Frances McDormand",
+    "Tilda Swinton",
+    "Emily Blunt",
+    "Rachel McAdams",
+    "Rachel Weisz",
+    "Kate Winslet",
+    "Kate Beckinsale",
+    "Kate Hudson",
+    "Sandra Bullock",
+    "Reese Witherspoon",
+    "Julianne Moore",
+    "Michelle Williams",
+    "Michelle Pfeiffer",
+    "Helen Mirren",
+    "Judi Dench",
+    "Emma Thompson",
+    "Helena Bonham Carter",
+    "Saoirse Ronan",
+    "Florence Pugh",
+    "Anya Taylor-Joy",
+    "Dakota Johnson",
+    "Dakota Fanning",
+    "Elle Fanning",
+    "Amanda Seyfried",
+    "Mila Kunis",
+    "Natalie Dormer",
+    "Olivia Colman",
+    "Olivia Wilde",
+    "Alicia Vikander",
+    "Brie Larson",
+    "Gal Gadot",
+    "Elizabeth Olsen",
+    "Kirsten Dunst",
+    "Winona Ryder",
+    "Uma Thurman",
+    "Salma Hayek",
+    "Penelope Cruz",
+    "Marion Cotillard",
+    "Lupita Nyong'o",
+    "Naomi Watts",
+    "Naomi Scott",
+    "Keira Knightley",
+    "Carey Mulligan",
+    "Rosamund Pike",
+    "Emily Watson",
+    "Jodie Foster",
+    "Kristen Stewart",
+    "Kristen Wiig",
+    "Melissa McCarthy",
+    "Toni Collette",
+    "Awkwafina",
+    "Gemma Chan",
+    "Lucy Liu",
+    "Maggie Gyllenhaal",
+    "Regina King",
+    "Laura Dern",
+    "Jennifer Connelly",
+    "Jennifer Garner",
+    "Jennifer Lopez",
+    "Cameron Diaz",
+    "Drew Barrymore",
+
+    "Ben Affleck",
+    "Casey Affleck",
+    "George Clooney",
+    "Russell Crowe",
+    "Colin Farrell",
+    "Colin Firth",
+    "Benedict Cumberbatch",
+    "Andrew Garfield",
+    "Tobey Maguire",
+    "James McAvoy",
+    "Ewan McGregor",
+    "Jude Law",
+    "Ralph Fiennes",
+    "Liam Neeson",
+    "Brendan Gleeson",
+    "Colin Hanks",
+    "Edward Norton",
+    "Adrien Brody",
+    "Javier Bardem",
+    "Oscar Isaac",
+    "Pedro Pascal",
+    "Mahershala Ali",
+    "Chiwetel Ejiofor",
+    "Forest Whitaker",
+    "Jamie Foxx",
+    "Don Cheadle",
+    "Laurence Fishburne",
+    "Jeffrey Wright",
+    "Willem Dafoe",
+    "John Malkovich",
+    "John C. Reilly",
+    "Steve Carell",
+    "Paul Rudd",
+    "Paul Giamatti",
+    "Paul Dano",
+    "Jason Bateman",
+    "Jason Statham",
+    "Jason Momoa",
+    "Gerard Butler",
+    "Mark Wahlberg",
+    "Jeremy Renner",
+    "Jeremy Strong",
+    "Josh Brolin",
+    "Josh Hartnett",
+    "Ethan Hawke",
+    "Kevin Bacon",
+    "Kevin Costner",
+    "Kevin Spacey",
+    "Woody Harrelson",
+    "Sam Rockwell",
+    "Bryan Cranston",
+    "Aaron Paul",
+    "Michael Keaton",
+    "Michael Douglas",
+    "Michael B. Jordan",
+    "Viggo Mortensen",
+    "Harrison Ford",
+    "Anthony Hopkins",
+    "Ian McKellen",
+    "Patrick Stewart",
+    "Gary Sinise",
+    "Jeff Bridges",
+    "Kurt Russell",
+    "Bill Murray",
+    "Dan Aykroyd",
+    "John Goodman",
+    "Stanley Tucci",
+    "Christopher Walken",
+    "Christoph Waltz",
+    "Daniel Craig",
+    "Pierce Brosnan",
+    "Timothée Chalamet",
+    "Austin Butler",
+    "Barry Keoghan",
+]
+
+EXISTING_IDS = {
+    85,
+    2037,
+    500,
+    31,
+    287,
+    6193,
+    1245,
+    1892,
+    3223,
+    3894,
+    17288,
+    10859,
+    16828,
+    74568,
+    54693,
+    5064,
+    1813,
+    11701,
+    6885,
+    17605,
+    5292,
+    192,
+    2524,
+    73457,
+    37625,
+    1158,
+    380,
+    64,
+    6968,
+    18918,
+    13240,
+    10980,
+    10990,
+    1136406,
+    505710,
+    17838,
+}
+
+
+actor_ids = []
+
+for name in FAMOUS_ACTOR_NAMES:
+    results = search_actors(name)
+
+    exact_match = next(
+        (
+            actor
+            for actor in results
+            if actor["name"].lower() == name.lower()
+        ),
+        None,
+    )
+
+    if exact_match is None:
+        print(f"NOT FOUND: {name}")
+        continue
+
+    actor_id = exact_match["id"]
+
+    if actor_id in EXISTING_IDS:
+        print(f"ALREADY INCLUDED: {name} ({actor_id})")
+        continue
+
+    if actor_id in actor_ids:
+        print(f"DUPLICATE: {name} ({actor_id})")
+        continue
+
+    actor_ids.append(actor_id)
+
+    print(
+        f"    {actor_id},  # {exact_match['name']}"
+    )
+
+
+print()
+print(f"Total new actors: {len(actor_ids)}")
