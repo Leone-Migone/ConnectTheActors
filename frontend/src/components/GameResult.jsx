@@ -4,6 +4,7 @@ const TMDB_IMAGE_BASE_URL =
 function GameResult({
   status,
   playerPath,
+  elapsedtime,
   onPlayAgain,
   onMainMenu,
 }) {
@@ -30,7 +31,12 @@ function GameResult({
             : "The target actor was not connected before all three lives were lost."}
         </p>
       </div>
-
+      {won && (
+        <div className="game-result__time">
+          <span>Completed in</span>
+          <strong>{elapsedtime}</strong>
+        </div>
+      )}
       {playerPath && playerPath.length > 0 && (
         <div className="result-path">
           {playerPath.map((node, index) => {
