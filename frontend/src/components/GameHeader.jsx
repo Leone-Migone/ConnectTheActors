@@ -8,7 +8,6 @@ function GameHeader({
   targetActor,
   lives,
   status,
-  elapsedtime,
 }) {
   return (
     <header className="game-header">
@@ -22,25 +21,13 @@ function GameHeader({
         </div>
 
         <div className="game-header__status">
-          <div className="game-timer">
-            <span className="game-timer__label">
-            Time
-            </span>
-
-            <strong className="game-timer__value"> 
-              {elapsedtime}
-            </strong>
-          </div>
-          
           <Lives lives={lives} />
-
 
           <span
             className={`status-badge status-badge--${status}`}
           >
             {status}
           </span>
-          
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import GameHeader from "./GameHeader";
 import GraphBoard from "./GraphBoard";
@@ -14,7 +14,6 @@ import {
 const TMDB_IMAGE_BASE_URL =
   "https://image.tmdb.org/t/p/w300";
 
-
 function GameScreen({
   game,
   setGame,
@@ -29,29 +28,6 @@ function GameScreen({
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
   const [isLoading, setIsLoading] = useState(false);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-
-  useEffect(() => {
-  if (game.status !== "playing") {
-    return;
-  }
-
-  const interval = setInterval(() => {
-    setElapsedSeconds((seconds) => seconds + 1);
-  }, 1000);
-
-  return () => clearInterval(interval);
-  }, [game.status]);
-
-  function formatTime(totalSeconds) {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  return `${minutes}:${seconds
-    .toString()
-    .padStart(2, "0")}`;
-}
-
 
   async function handleSearch() {
     if (!query.trim()) {
@@ -179,7 +155,6 @@ function GameScreen({
         targetActor={targetActor}
         lives={game.lives}
         status={game.status}
-        elapsedtime = {formatTime(elapsedSeconds)}
       />
 
       {game.status === "playing" && (
@@ -323,7 +298,6 @@ function GameScreen({
         <GameResult
           status={game.status}
           playerPath={game.player_path}
-          elapsedtime={formatTime(elapsedSeconds)}
           onPlayAgain={onPlayAgain}
           onMainMenu={onMainMenu}
         />
